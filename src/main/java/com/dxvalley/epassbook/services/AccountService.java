@@ -1,5 +1,10 @@
 package com.dxvalley.epassbook.services;
 
-public class AccountService {
+import com.dxvalley.epassbook.models.Account;
 
+public interface AccountService {
+    Account addAccount(Account account, Long userId);
+    Account updateAccount(Long id, Account newAccount, Long userId);
+    Account getMainAccount(Long userId);
 }
+
