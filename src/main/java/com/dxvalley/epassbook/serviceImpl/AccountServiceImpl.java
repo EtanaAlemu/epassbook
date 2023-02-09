@@ -1,9 +1,10 @@
 package com.dxvalley.epassbook.serviceImpl;
 
 import com.dxvalley.epassbook.models.Account;
-import com.dxvalley.epassbook.models.User;
-import com.dxvalley.epassbook.repository.AccountRepository;
-import com.dxvalley.epassbook.repository.UserRepository;
+import com.dxvalley.epassbook.models.Users;
+import com.dxvalley.epassbook.repositories.AccountRepository;
+import com.dxvalley.epassbook.repositories.UserRepository;
+
 import org.springframework.stereotype.Service;
 import com.dxvalley.epassbook.services.AccountService;
 
@@ -21,8 +22,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account addAccount(Account account, Long userId) {
 
-        User user = userRepository.getById(userId);
-        account.setUser(user);
+        Users users = userRepository.getById(userId);
+        account.setUser(users);
         return accountRepository.save(account);
     }
 

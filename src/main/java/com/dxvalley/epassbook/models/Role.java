@@ -1,26 +1,21 @@
 package com.dxvalley.epassbook.models;
 
-
-import javax.persistence.*;
-import com.dxvalley.epassbook.enums.ERole;
+import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
 
+@Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
+@RequiredArgsConstructor
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private int id;
+    private String roleName;
+    private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20,unique=true)
-    private ERole name;
-
-    public Role(ERole name) {
-        this.name = name;
+    public Role(String roleName, String description) {
+        this.roleName = roleName;
+        this.description = description;
     }
 }

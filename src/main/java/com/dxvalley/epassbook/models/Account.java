@@ -1,10 +1,9 @@
 package com.dxvalley.epassbook.models;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import javax.persistence.*;
 
 @Getter
 @Setter
@@ -12,16 +11,17 @@ import javax.persistence.*;
 @Entity
 public class Account {
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long accountId;
     private String accountNumber;
+    private Boolean isMainAccount;
 
     public Account(String accountNumber) {
         this.accountNumber = accountNumber;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private User user;
-  
+    @JoinColumn(name = "user_id")
+    private Users user;
+
 }

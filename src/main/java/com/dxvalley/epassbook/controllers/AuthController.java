@@ -1,137 +1,203 @@
 package com.dxvalley.epassbook.controllers;
 
-
-import java.util.HashSet;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
-import com.dxvalley.epassbook.enums.ERole;
+import com.dxvalley.epassbook.models.Address;
 import com.dxvalley.epassbook.models.Role;
-import com.dxvalley.epassbook.models.User;
-import com.dxvalley.epassbook.payloads.request.LoginRequest;
-import com.dxvalley.epassbook.payloads.request.SignupRequest;
-import com.dxvalley.epassbook.payloads.response.JwtResponse;
-import com.dxvalley.epassbook.payloads.response.MessageResponse;
-import com.dxvalley.epassbook.repository.RoleRepository;
-import com.dxvalley.epassbook.repository.UserRepository;
-import com.dxvalley.epassbook.security.JwtUtils;
-import com.dxvalley.epassbook.security.UserDetailsImpl;
+import com.dxvalley.epassbook.models.Users;
+import com.dxvalley.epassbook.repositories.RoleRepository;
+import com.dxvalley.epassbook.repositories.UserRepository;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    AuthenticationManager authenticationManager;
+        private final UserRepository userRepository;
+        private final RoleRepository roleRepo;
+        private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    UserRepository userRepository;
+        // get user info
+        @GetMapping("/getUserInfo")
+        public ResponseEntity<?> getUserInfo(@RequestBody MobileNumber phoneNumber) {
+                try {
+                        String uri = "http://10.1.245.150:7081/userInfo";
+                        RestTemplate restTemplate = new RestTemplate();
 
-    @Autowired
-    RoleRepository roleRepository;
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_JSON);
 
-    @Autowired
-    PasswordEncoder encoder;
+                        String requestBody = "{\"phoneNumber\":" + phoneNumber.getPhoneNumber() + "}";
 
-    @Autowired
-    JwtUtils jwtUtils;
+                        HttpEntity<String> request = new HttpEntity<String>(requestBody, headers);
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+                        ResponseEntity<UserInfoResponse> res = restTemplate.exchange(uri, HttpMethod.POST, request,
+                                        UserInfoResponse.class);
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
-    }
-
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+                        return new ResponseEntity<>(res.getBody(), HttpStatus.OK);
+                } catch (Exception e) {
+                        createUserResponse response = new createUserResponse("error",
+                                        " Can't find User with this phone Number");
+                        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+                }
         }
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+        @PostMapping("/checkUserExistance")
+        public ResponseEntity<?> checkUserExistance(@RequestBody MobileNumber phoneNumber) {
+                try {
+                        String uri = "http://10.1.245.150:7081/userInfo";
+                        RestTemplate restTemplate = new RestTemplate();
+
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_JSON);
+
+                        String requestBody = "{\"phoneNumber\":" + phoneNumber.getPhoneNumber() + "}";
+
+                        HttpEntity<String> request = new HttpEntity<String>(requestBody, headers);
+
+                        restTemplate.exchange(uri, HttpMethod.POST, request,
+                                        UserInfoResponse.class);
+
+                        // send OTP
+                        return new ResponseEntity<>(
+                                        "{" + "\"message\":" + "OTP Sent to: " + phoneNumber.getPhoneNumber() + "!}",
+                                        HttpStatus.OK);
+                } catch (Exception e) {
+                        createUserResponse response = new createUserResponse("error",
+                                        " Can't find User with this phone Number");
+                        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+                }
         }
 
-//        Set<String> strRoles = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
+        @PostMapping("/findAccountsByPhoneNumber")
+        public ResponseEntity<?> getAccounts(@RequestBody MobileNumber phoneNumber) {
+                try {
+                        String uri = "http://10.1.245.150:7081/userInfo";
+                        RestTemplate restTemplate = new RestTemplate();
 
-//        if (strRoles == null) {
-//            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-//                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//            roles.add(userRole);
-//        } else {
-//            strRoles.forEach(role -> {
-//                switch (role) {
-//                    case "admin":
-//                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(adminRole);
-//
-//                        break;
-//                    case "mod":
-//                        Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(modRole);
-//
-//                        break;
-//                    default:
-//                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(userRole);
-//                }
-//            });
-//        }
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        /**
-         * add user role by default
-         */
-        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-        roles.add(userRole);
+                        String requestBody = "{\"phoneNumber\":" + phoneNumber.getPhoneNumber() + "}";
 
-        // Create new user's account
-        User user = new User();
-        user.setPassword(signUpRequest.getUsername());
-        user.setEmail(signUpRequest.getEmail());
-        user.setPassword(encoder.encode(signUpRequest.getPassword()));
-        user.setRoles(roles);
-        userRepository.save(user);
+                        HttpEntity<String> request = new HttpEntity<String>(requestBody, headers);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
-    }
+                        ResponseEntity<UserInfoResponse> res = restTemplate.exchange(uri, HttpMethod.POST, request,
+                                        UserInfoResponse.class);
+
+                        // for (int i = 0; i < res.getBody().getUserInfo().getAccounts().size(); i++) {
+                        // // res.getBody().getUserInfo().getAccounts().add
+                        // System.out.println(res.getBody().getUserInfo().getAccounts().get(i));
+                        // // accs.add(new Account());
+                        // }
+                        return new ResponseEntity<>(res.getBody().getUserInfo().getAccounts(), HttpStatus.OK);
+                } catch (Exception e) {
+                        createUserResponse response = new createUserResponse("error",
+                                        " Can't find User with this phone Number");
+                        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+                }
+        }
+
+        // Register User
+        @PostMapping("/register")
+        public ResponseEntity<?> register(@RequestBody Users users) {
+
+                System.out.println(passwordEncoder.encode(users.getPassword()));
+                if (userRepository.findByUsername(users.getUsername()) != null) {
+                        createUserResponse response = new createUserResponse("error", "User already exists!");
+                        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+                }
+
+
+                ResponseEntity<UserInfoResponse> res;
+                try {
+                        String uri = "http://10.1.245.150:7081/userInfo";
+                        RestTemplate restTemplate = new RestTemplate();
+
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_JSON);
+
+                        String requestBody = "{\"phoneNumber\":" + users.getUsername() + "}";
+
+                        HttpEntity<String> request = new HttpEntity<String>(requestBody, headers);
+
+                        res = restTemplate.exchange(uri, HttpMethod.POST, request, UserInfoResponse.class);
+
+                        UserInfo userInfo = res.getBody().getUserInfo();
+                        users.setFullName(userInfo.getFullName());
+                        users.setAddress(userInfo.getAddress());
+                        users.setEmail(userInfo.getEmail());
+                        users.setBirthDate(userInfo.getEmail());
+                        users.setGender(userInfo.getGender());
+                        users.setImageUrl(userInfo.getImageUrl());
+                        users.setLanguageCode(Integer.parseInt(userInfo.getLanguageCode()));
+                        users.setEmailConfirmed(false);
+                        users.setAccessFailedCount(0);
+                        users.setIsEnabled(true);
+                        users.setCreatedAt(LocalDateTime.now().toString());
+                        users.setTwoFactorEnabled(false);
+                } catch (Exception e) {
+                        createUserResponse response = new createUserResponse("error",
+                                        "Can't find User with this phone Number on CBS!");
+                        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+                }
+
+                List<Role> roles = new ArrayList<Role>(1);
+                roles.add(this.roleRepo.findByRoleName("user"));
+                users.setRoles(roles);
+                users.setPassword(passwordEncoder.encode(users.getPassword()));
+                users.setAccounts(users.getAccounts());
+
+                return new ResponseEntity<>(userRepository.save(users), HttpStatus.CREATED);
+        }
+
+}
+
+@Data
+class MobileNumber {
+        private String phoneNumber;
+}
+
+@Data
+class UserInfoResponse {
+        private UserInfo userInfo;
+}
+
+@Data
+class UserInfo {
+        private String fullName;
+        private String gender;
+        private String dateOfBirth;
+        private String email;
+        private String imageUrl;
+        private String languageCode;
+        ArrayList<Object> accounts = new ArrayList<Object>();
+        Address address;
+        @JsonProperty("Status")
+        private String Status;
+}
+
+@Data
+class Account {
+        private String isMain;
+        private String accountName;
 }
