@@ -25,8 +25,8 @@ public class Bootstrap {
     Role sysAdmin = new Role("sysAdmin", "Highest Level System Administrator");
     Address address = new Address("+251924385314", "elshadayt@coopbankoromia.com.et", "Addis Ababa", "Lideta", "01",
             "312");
-    Users user = new Users("0911111111", "elshu13", "Elshaday Tamire", "elshadayt@coopbankoromia.com.et", true, "MALE",
-            "07-09-1999", "/image.png", "198.1.13.2", "01-09-2022", null, 1, 0, false, true);
+    Users user = new Users("johndoe", "123456", "John Doe", "johndoe@coopbankoromia.com.et", true, "MALE", 
+            "07-09-1999", "/image.png", "198.1.13.2", "01-09-2022", null, 1, "967434568", 0, false, true);
 
     Collection<Role> roles = new ArrayList<>();
 

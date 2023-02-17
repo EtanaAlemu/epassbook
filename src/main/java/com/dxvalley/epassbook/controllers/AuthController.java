@@ -53,7 +53,8 @@ public class AuthController {
                         ResponseEntity<UserInfoResponse> res = restTemplate.exchange(uri, HttpMethod.POST, request,
                                         UserInfoResponse.class);
 
-                        return new ResponseEntity<>(res.getBody(), HttpStatus.OK);
+                        return new ResponseEntity<>(res, HttpStatus.OK);
+
                 } catch (Exception e) {
                         createUserResponse response = new createUserResponse("error",
                                         " Can't find User with this phone Number");
@@ -74,13 +75,11 @@ public class AuthController {
 
                         HttpEntity<String> request = new HttpEntity<String>(requestBody, headers);
 
-                        restTemplate.exchange(uri, HttpMethod.POST, request,
-                                        UserInfoResponse.class);
+                        restTemplate.exchange(uri, HttpMethod.POST, request, UserInfoResponse.class);
 
-                        // send OTP
-                        return new ResponseEntity<>(
-                                        "{" + "\"message\":" + "OTP Sent to: " + phoneNumber.getPhoneNumber() + "!}",
-                                        HttpStatus.OK);
+                        createUserResponse response = new createUserResponse("Success", "User exists!");
+                        return new ResponseEntity<>(response, HttpStatus.OK);
+
                 } catch (Exception e) {
                         createUserResponse response = new createUserResponse("error",
                                         " Can't find User with this phone Number");
@@ -122,6 +121,7 @@ public class AuthController {
         public ResponseEntity<?> register(@RequestBody Users users) {
 
                 System.out.println(passwordEncoder.encode(users.getPassword()));
+                
                 if (userRepository.findByUsername(users.getUsername()) != null) {
                         createUserResponse response = new createUserResponse("error", "User already exists!");
                         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -158,6 +158,7 @@ public class AuthController {
                 } catch (Exception e) {
                         createUserResponse response = new createUserResponse("error",
                                         "Can't find User with this phone Number on CBS!");
+
                         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
                 }
 

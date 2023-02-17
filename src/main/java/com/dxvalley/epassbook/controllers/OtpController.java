@@ -31,7 +31,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @RestController
-@RequestMapping("/otp")
+@RequestMapping("/api/otp")
 public class OtpController {
     private final OtpService otpService;
     private final OtpRepository otpRepository;
