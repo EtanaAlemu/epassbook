@@ -111,6 +111,12 @@ public class AuthController {
 //                users.setPassword(passwordEncoder.encode(users.getPassword()));
                 users.setAccounts(users.getAccounts());
 
+
+
+//                userInfo.getAccounts().stream().map(account -> {
+//                        accountRepository.save(account.);
+//                });
+
                 return new ResponseEntity<>(userRepository.save(users), HttpStatus.CREATED);
 
         }
