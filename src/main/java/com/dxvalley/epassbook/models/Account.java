@@ -15,6 +15,7 @@ public class Account {
     private Long accountId;
     private String accountNumber;
     private Boolean isMainAccount;
+    private Integer passcode;
 
     public Account(String accountNumber) {
         this.accountNumber = accountNumber;
