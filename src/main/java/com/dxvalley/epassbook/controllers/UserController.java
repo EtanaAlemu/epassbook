@@ -110,22 +110,6 @@ public class UserController {
     return new ResponseEntity<>(user, HttpStatus.OK);
   }
 
-  @PostMapping("/createUser")
-  public ResponseEntity<createUserResponse> accept(@RequestBody Users tempUser) {
-    var user = userRepository.findByUsername(tempUser.getUsername());
-    if (user != null) {
-      createUserResponse response = new createUserResponse("error", "user already exists");
-      return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    tempUser.setRoles(
-        tempUser.getRoles().stream().map(x -> this.roleRepo.findByRoleName(x.getRoleName()))
-            .collect(Collectors.toList()));
-    tempUser.setPassword(passwordEncoder.encode(tempUser.getPassword()));
-    userRepository.save(tempUser);
-    createUserResponse response = new createUserResponse("success", "user created successfully");
-    return new ResponseEntity<>(response, HttpStatus.OK);
-  }
 
   @PutMapping("/changePin/{phoneNumber}")
   public ResponseEntity<pinchangeResponse> pinChange(@RequestBody Users tempUser,
