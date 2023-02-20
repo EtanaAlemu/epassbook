@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dxvalley.epassbook.models.Account;
 import com.dxvalley.epassbook.repositories.AccountRepository;
+import com.dxvalley.epassbook.repositories.AddressRepository;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,6 +35,7 @@ public class AuthController {
         private final RoleRepository roleRepo;
         private final PasswordEncoder passwordEncoder;
         private final AccountRepository accountRepository;
+        private final AddressRepository addressRepository;
 
         // get user info
         @GetMapping("/getUserInfo")
@@ -60,66 +63,67 @@ public class AuthController {
                 }
         }
 
-        @PostMapping("/checkUserExistance")
-        public ResponseEntity<?> checkUserExistance(@RequestBody MobileNumber phoneNumber) {
+        @PostMapping("/checkUserExistence")
+        public ResponseEntity<?> checkUserExistence(@RequestBody MobileNumber phoneNumber) {
 
                 if (userRepository.findByPhoneNumber(phoneNumber.getPhoneNumber()) != null) {
-                        createUserResponse response = new createUserResponse("error", "This phoneNumber is already used on this platform!");
+                        createUserResponse response = new createUserResponse(
+                                "error",
+                                "This phoneNumber is already used on this platform!");
                         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                 }
 
-                Users users = new Users();
                 ResponseEntity<UserInfoResponse> res;
                 try {
                         String uri = "http://10.1.245.150:7081/userInfo";
                         RestTemplate restTemplate = new RestTemplate();
-
                         HttpHeaders headers = new HttpHeaders();
                         headers.setContentType(MediaType.APPLICATION_JSON);
-
-                        String requestBody = "{\"phoneNumber\":" + users.getUsername() + "}";
-
+                        String requestBody = "{\"phoneNumber\":" + phoneNumber.getPhoneNumber() + "}";
                         HttpEntity<String> request = new HttpEntity<String>(requestBody, headers);
-
                         res = restTemplate.exchange(uri, HttpMethod.POST, request, UserInfoResponse.class);
                 } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                        createUserResponse response = new createUserResponse("error",
+                        createUserResponse response = new createUserResponse(
+                                "error",
                                 "Can't find User with this phone Number on CBS!");
-
                         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
                 }
+
+                Users users = new Users();
+                UserInfo userInfo = res.getBody().getUserInfo();
 
                 List<Role> roles = new ArrayList<Role>(1);
                 roles.add(this.roleRepo.findByRoleName("user"));
 
-                UserInfo userInfo = res.getBody().getUserInfo();
-
                 users.setRoles(roles);
+                users.setUsername(phoneNumber.getPhoneNumber());
                 users.setFullName(userInfo.getFullName());
-                users.setAddress(userInfo.getAddress());
                 users.setEmail(userInfo.getEmail());
+                users.setEmailConfirmed(false);
                 users.setBirthDate(userInfo.getDateOfBirth());
                 users.setGender(userInfo.getGender());
                 users.setImageUrl(userInfo.getImageUrl());
-//                users.setLanguageCode(Integer.parseInt(userInfo.getLanguageCode()));
-                users.setEmailConfirmed(false);
-                users.setAccessFailedCount(0);
-                users.setIsEnabled(true);
                 users.setCreatedAt(LocalDateTime.now().toString());
+                users.setAccessFailedCount(0);
                 users.setTwoFactorEnabled(false);
-//                users.setPassword(passwordEncoder.encode(users.getPassword()));
-                users.setAccounts(users.getAccounts());
+                users.setIsEnabled(true);
+                users.setPhoneNumber(phoneNumber.getPhoneNumber());
+                users.setLanguageCode(Integer.parseInt(userInfo.getLanguageCode()));
 
+                Address address = addressRepository.save(userInfo.getAddress());
+                users.setAddress(address);
 
-
-//                userInfo.getAccounts().stream().map(account -> {
-//                        accountRepository.save(account.);
-//                });
+                List<Account> accounts = null;
+                for (var account : userInfo.getAccounts()){
+                        accounts.add((Account)account);
+                }
+                List<Account>  accountList = accountRepository.saveAll(accounts);
+                users.setAccounts(accountList);
 
                 return new ResponseEntity<>(userRepository.save(users), HttpStatus.CREATED);
 
         }
+
 
         @PutMapping("/setPasswordAndUsername")
         public ResponseEntity<createUserResponse> accept(@RequestBody Users tempUser) {
@@ -131,8 +135,9 @@ public class AuthController {
 
                 var user = userRepository.findByPhoneNumber(tempUser.getPhoneNumber());
 
-                tempUser.setUsername(tempUser.getUsername());
-                tempUser.setPassword(passwordEncoder.encode(tempUser.getPassword()));
+                user.setUsername(tempUser.getUsername());
+                user.setPassword(passwordEncoder.encode(tempUser.getPassword()));
+                userRepository.save(user);
 
                 createUserResponse response = new createUserResponse("success", "Updated successfully");
                 return new ResponseEntity<>(response, HttpStatus.OK);
@@ -248,8 +253,3 @@ class UserInfo {
         private String Status;
 }
 
-@Data
-class Account {
-        private String isMain;
-        private String accountName;
-}
