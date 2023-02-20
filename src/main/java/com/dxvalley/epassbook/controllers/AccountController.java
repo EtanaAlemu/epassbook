@@ -2,7 +2,9 @@ package com.dxvalley.epassbook.controllers;
 
 import java.util.List;
 
+import com.dxvalley.epassbook.models.Users;
 import com.dxvalley.epassbook.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,16 +16,12 @@ import com.dxvalley.epassbook.serviceImpl.AccountServiceImpl;
 @RestController
 @RequestMapping("/api/accounts")
 public class AccountController {
+    @Autowired
     private AccountServiceImpl accountService;
+    @Autowired
     private AccountRepository accountRepository;
-    private final UserRepository userRepository;
-
-    public AccountController(AccountServiceImpl accountService, AccountRepository accountRepository,
-                             UserRepository userRepository) {
-        this.accountService = accountService;
-        this.accountRepository = accountRepository;
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/getAccounts")
     List<Account> getUsers() {
@@ -33,11 +31,32 @@ public class AccountController {
     @PostMapping("/{userId}")
     public ResponseEntity<Account> addAccount(@RequestBody Account account, @PathVariable Long userId) {
         Account newAccount = accountService.addAccount(account, userId);
-
         return new ResponseEntity<>(newAccount, HttpStatus.CREATED);
     }
 
-    @PutMapping("setPrimaryAccount/{userId}")
+    @GetMapping("/getPrimaryAccount")
+    public ResponseEntity<?> getPrimaryAccount(@RequestParam String phoneNumber, @RequestParam Integer passcode) {
+        Users user = userRepository.findByPhoneNumber(phoneNumber);
+        var primaryAccount = accountRepository.findPrimaryAccount(user.getUserId());
+
+        if(primaryAccount == null) {
+            createUserResponse response = new createUserResponse(
+                    "error",
+                    "You don't have a primary account!");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        if(primaryAccount.getPasscode() != passcode) {
+            createUserResponse response = new createUserResponse(
+                    "error",
+                    "Invalid passcode!");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<>(
+                primaryAccount,
+                HttpStatus.OK);
+    }
+
+    @PutMapping("/setPrimaryAccount/{userId}")
     public ResponseEntity<?> setPrimaryAccount(@RequestBody Account tempAccount, @PathVariable Long userId) {
         var accounts = accountRepository.findByUser(userId);
 
