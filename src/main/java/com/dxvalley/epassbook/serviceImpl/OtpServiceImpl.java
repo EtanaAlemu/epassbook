@@ -19,9 +19,9 @@ public class OtpServiceImpl implements OtpService{
     @Autowired
     private OtpRepository otpRepository;
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(3);
     @Override
     public Otp addOtp(String phoneNumber, String optCode) {
+        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(3);
         Otp otp = new Otp();
         otp.setOtpCode(optCode);
         otp.setPhoneNumber(phoneNumber);
@@ -73,8 +73,8 @@ public class OtpServiceImpl implements OtpService{
 
     public static String getRandomNumberString() {
         Random rnd = new Random();
-        int number = rnd.nextInt(99999);
-        return String.format("%05d", number);
+        int number = rnd.nextInt(999999);
+        return String.format("%06d", number);
     }
 
 }

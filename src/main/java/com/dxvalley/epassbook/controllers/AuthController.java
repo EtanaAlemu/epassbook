@@ -7,6 +7,7 @@ import java.util.List;
 import com.dxvalley.epassbook.models.Account;
 import com.dxvalley.epassbook.repositories.AccountRepository;
 import com.dxvalley.epassbook.repositories.AddressRepository;
+import com.dxvalley.epassbook.services.OtpService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,6 +37,7 @@ public class AuthController {
         private final PasswordEncoder passwordEncoder;
         private final AccountRepository accountRepository;
         private final AddressRepository addressRepository;
+        private final OtpService otpService;
 
         // get user info
         @GetMapping("/getUserInfo")
@@ -65,7 +67,6 @@ public class AuthController {
 
         @PostMapping("/checkUserExistence")
         public ResponseEntity<?> checkUserExistence(@RequestBody MobileNumber phoneNumber) {
-
                 if (userRepository.findByPhoneNumber(phoneNumber.getPhoneNumber()) != null) {
                         createUserResponse response = new createUserResponse(
                                 "error",
@@ -91,6 +92,7 @@ public class AuthController {
 
                 Users users = new Users();
                 UserInfo userInfo = res.getBody().getUserInfo();
+                otpService.sendOtp(phoneNumber.getPhoneNumber());
 
                 List<Role> roles = new ArrayList<Role>(1);
                 roles.add(this.roleRepo.findByRoleName("user"));
@@ -106,7 +108,7 @@ public class AuthController {
                 users.setCreatedAt(LocalDateTime.now().toString());
                 users.setAccessFailedCount(0);
                 users.setTwoFactorEnabled(false);
-                users.setIsEnabled(true);
+                users.setIsEnabled(false);
                 users.setPhoneNumber(phoneNumber.getPhoneNumber());
                 users.setLanguageCode(0);
 
@@ -129,7 +131,8 @@ public class AuthController {
         public ResponseEntity<createUserResponse> accept(@RequestBody Users tempUser) {
                 var result = userRepository.findByUsername(tempUser.getUsername());
                 if (result != null) {
-                        createUserResponse response = new createUserResponse("error", "This username is already used.");
+                        createUserResponse response = new createUserResponse(
+                                "error", "This username is already used.");
                         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
                 }
 
@@ -138,16 +141,14 @@ public class AuthController {
                         user.setUsername(tempUser.getUsername());
                         user.setPassword(passwordEncoder.encode(tempUser.getPassword()));
                         userRepository.save(user);
-
-
-                        createUserResponse response = new createUserResponse("success", "Updated successfully");
+                        createUserResponse response = new createUserResponse(
+                                "success", "Updated successfully");
                         return new ResponseEntity<>(response, HttpStatus.OK);
                 }
 
-
-                        createUserResponse response = new createUserResponse("error", "This username is not exist");
-                        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-
+                createUserResponse response = new createUserResponse(
+                        "error", "There is no user with this phoneNumber");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
 
