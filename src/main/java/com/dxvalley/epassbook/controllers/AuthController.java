@@ -108,14 +108,14 @@ public class AuthController {
                 users.setTwoFactorEnabled(false);
                 users.setIsEnabled(true);
                 users.setPhoneNumber(phoneNumber.getPhoneNumber());
-                users.setLanguageCode(Integer.parseInt(userInfo.getLanguageCode()));
+                users.setLanguageCode(0);
 
                 Address address = addressRepository.save(userInfo.getAddress());
                 users.setAddress(address);
 
-                List<Account> accounts = null;
+                ArrayList<Account> accounts = new ArrayList<>();
                 for (var account : userInfo.getAccounts()){
-                        accounts.add((Account)account);
+                        accounts.add(account);
                 }
                 List<Account>  accountList = accountRepository.saveAll(accounts);
                 users.setAccounts(accountList);
@@ -134,14 +134,22 @@ public class AuthController {
                 }
 
                 var user = userRepository.findByPhoneNumber(tempUser.getPhoneNumber());
+                if(user!=null){
+                        user.setUsername(tempUser.getUsername());
+                        user.setPassword(passwordEncoder.encode(tempUser.getPassword()));
+                        userRepository.save(user);
 
-                user.setUsername(tempUser.getUsername());
-                user.setPassword(passwordEncoder.encode(tempUser.getPassword()));
-                userRepository.save(user);
 
-                createUserResponse response = new createUserResponse("success", "Updated successfully");
-                return new ResponseEntity<>(response, HttpStatus.OK);
+                        createUserResponse response = new createUserResponse("success", "Updated successfully");
+                        return new ResponseEntity<>(response, HttpStatus.OK);
+                }
+
+
+                        createUserResponse response = new createUserResponse("error", "This username is not exist");
+                        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
         }
+
 
         @PostMapping("/findAccountsByPhoneNumber")
         public ResponseEntity<?> getAccounts(@RequestBody MobileNumber phoneNumber) {
@@ -247,7 +255,7 @@ class UserInfo {
         private String email;
         private String imageUrl;
         private String languageCode;
-        ArrayList<Object> accounts = new ArrayList<Object>();
+        ArrayList<Account> accounts = new ArrayList<Account>();
         Address address;
         @JsonProperty("Status")
         private String Status;
