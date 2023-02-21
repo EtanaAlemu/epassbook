@@ -1,6 +1,7 @@
 package com.dxvalley.epassbook.serviceImpl;
 
 import com.dxvalley.epassbook.dto.ApiResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
@@ -9,19 +10,27 @@ import com.dxvalley.epassbook.repositories.OtpRepository;
 import com.dxvalley.epassbook.services.OtpService;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Random;
+
 @Service
 public class OtpServiceImpl implements OtpService{
-    private final OtpRepository otpRepository;
-
-    public OtpServiceImpl(OtpRepository otpRepository) {
-        this.otpRepository = otpRepository;
-    }
+    @Autowired
+    private OtpRepository otpRepository;
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(3);
     @Override
-    public Otp addOtp(Otp otp) {
+    public Otp addOtp(String phoneNumber, String optCode) {
+        Otp otp = new Otp();
+        otp.setOtpCode(optCode);
+        otp.setPhoneNumber(phoneNumber);
+        otp.setOtpExpireDate(expiredAt.format(dateTimeFormatter));
         return this.otpRepository.save(otp);
     }
+
     @Override
-    public ApiResponse sendOtp(String phoneNumber, String randomNumber) {
+    public ApiResponse sendOtp(String phoneNumber) {
 
         ResponseEntity<String> res;
         try {
@@ -31,7 +40,7 @@ public class OtpServiceImpl implements OtpService{
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            String code = randomNumber;
+            String code = getRandomNumberString();
             String requestBody = "{\"mobile\":" + "\"" + phoneNumber + "\"," + "\"text\":" + "\""
                     + code + "\"" + "}";
 
@@ -39,6 +48,7 @@ public class OtpServiceImpl implements OtpService{
             res = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
 
             if (res.getStatusCode().toString().trim().equals("200 OK")) {
+                addOtp(phoneNumber,code);
                 return new ApiResponse(
                         "success",
                         "Message sent to your phone number.");
@@ -60,5 +70,11 @@ public class OtpServiceImpl implements OtpService{
     public void deleteOtp(Long otpId) {
         otpRepository.deleteById(otpId);
     }
-    
+
+    public static String getRandomNumberString() {
+        Random rnd = new Random();
+        int number = rnd.nextInt(99999);
+        return String.format("%05d", number);
+    }
+
 }

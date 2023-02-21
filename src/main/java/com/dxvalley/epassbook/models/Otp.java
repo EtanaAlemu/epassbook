@@ -22,7 +22,5 @@ public class Otp {
     private Long otpId;
     private String phoneNumber;
     private String otpCode;
-    @JsonFormat(pattern="yyyy-MM-dd hh:mm:s",shape = Shape.STRING)
-    @Column(name="otp_Expire_At")
     private String otpExpireDate;
 }
