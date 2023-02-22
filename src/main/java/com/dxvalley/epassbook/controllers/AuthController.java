@@ -1,13 +1,7 @@
 package com.dxvalley.epassbook.controllers;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.dxvalley.epassbook.dto.ApiResponse;
-import com.dxvalley.epassbook.dto.UserInfo;
-import com.dxvalley.epassbook.repositories.AccountRepository;
-import com.dxvalley.epassbook.repositories.AddressRepository;
+import com.dxvalley.epassbook.dto.UserInfo;;
 import com.dxvalley.epassbook.services.OtpService;
 import com.dxvalley.epassbook.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +11,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import com.dxvalley.epassbook.models.Role;
 import com.dxvalley.epassbook.models.Users;
-import com.dxvalley.epassbook.repositories.RoleRepository;
 import com.dxvalley.epassbook.repositories.UserRepository;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -95,7 +85,7 @@ public class AuthController {
         @PutMapping("/register")
         public ResponseEntity<?> accept(@RequestBody Users tempUser) {
             Users user = userService.registerUser(tempUser);
-            return new ResponseEntity<>(user, HttpStatus.OK);
+            return new ResponseEntity<>("registered Successfully", HttpStatus.OK);
         }
 
         @PostMapping("/findAccountsByPhoneNumber")
