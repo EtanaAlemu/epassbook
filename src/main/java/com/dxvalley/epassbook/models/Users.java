@@ -23,7 +23,7 @@ public class Users {
     private String email;
     private Boolean emailConfirmed;
     private String gender;
-    private String birthDate;
+    private String dateOfBirth;
     private String imageUrl;
     private String ip;
     private String createdAt;
@@ -48,7 +48,7 @@ public class Users {
     private List<Account> accounts;
     
     public Users(String username, String password, String fullName, String email, Boolean emailConfirmed, String gender,
-            String birthDate, String imageUrl, String ip, String createdAt, String deletedAt, Integer languageCode, String phoneNumber,
+            String dateOfBirth, String imageUrl, String ip, String createdAt, String deletedAt, Integer languageCode, String phoneNumber,
             Integer accessFailedCount, Boolean twoFactorEnabled, Boolean isEnabled) {
         this.username = username;
         this.password = new BCryptPasswordEncoder().encode(password);
@@ -56,7 +56,7 @@ public class Users {
         this.email = email;
         this.emailConfirmed = emailConfirmed;
         this.gender = gender;
-        this.birthDate = birthDate;
+        this.dateOfBirth = dateOfBirth;
         this.imageUrl = imageUrl;
         this.ip = ip;
         this.createdAt = createdAt;

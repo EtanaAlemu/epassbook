@@ -2,7 +2,12 @@ package com.dxvalley.epassbook.controllers;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.dto.UserInfo;
+import com.dxvalley.epassbook.models.Users;
 import com.dxvalley.epassbook.repositories.UserRepository;
+import com.dxvalley.epassbook.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,15 +22,14 @@ import com.dxvalley.epassbook.services.OtpService;
 @RequestMapping("/api/otp")
 public class OtpController {
     @Autowired
-    private OtpService otpService;
+    private UserService userService;
     @Autowired
     private OtpRepository otpRepository;
     @Autowired
     private UserRepository userRepository;
 
-
     @PostMapping("/verify/{otpCode}")
-    public ResponseEntity<?> Verify(@PathVariable String otpCode) {
+    public ResponseEntity<?> OtpVerify(@PathVariable String otpCode) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Otp otp = otpRepository.findOtpByOtpCode(otpCode);
 
@@ -39,10 +43,9 @@ public class OtpController {
                     "This otpCode has already expired. Please try again.",
                     HttpStatus.BAD_REQUEST);
         }
-        var user = userRepository.findByUsername(otp.getPhoneNumber());
-        user.setIsEnabled(true);
         otpRepository.delete(otp);
-        return new ResponseEntity<>(userRepository.save(user), HttpStatus.OK);
+        var response =  new ApiResponse("Success","Verified successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
