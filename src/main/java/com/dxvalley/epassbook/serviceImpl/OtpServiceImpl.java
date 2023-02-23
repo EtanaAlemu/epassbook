@@ -73,8 +73,8 @@ public class OtpServiceImpl implements OtpService{
 
     public static String getRandomNumberString() {
         Random rnd = new Random();
-        int number = rnd.nextInt(999999);
-        return String.format("%06d", number);
+        int number = rnd.nextInt(99999);
+        return String.format("%05d", number);
     }
 
 }
