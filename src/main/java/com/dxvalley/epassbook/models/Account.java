@@ -16,13 +16,8 @@ public class Account {
     private String accountNumber;
     private Boolean isMainAccount;
     private Integer passcode;
-
     public Account(String accountNumber) {
         this.accountNumber = accountNumber;
     }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private Users user;
 
 }

@@ -44,7 +44,6 @@ public class Users {
 
     // user accounts
     @OneToMany(targetEntity = Account.class, cascade = CascadeType.ALL)
-    @JoinColumn(name = "userId_fk", referencedColumnName = "userId")
     private List<Account> accounts;
     
     public Users(String username, String password, String fullName, String email, Boolean emailConfirmed, String gender,
