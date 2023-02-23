@@ -21,9 +21,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account addAccount(Account account, Long userId) {
-
         Users users = userRepository.getById(userId);
-        account.setUser(users);
         return accountRepository.save(account);
     }
 

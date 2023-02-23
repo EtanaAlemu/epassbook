@@ -2,7 +2,8 @@ package com.dxvalley.epassbook.controllers;
 
 import java.util.List;
 
-import com.dxvalley.epassbook.models.Users;
+import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
 import com.dxvalley.epassbook.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,34 +35,16 @@ public class AccountController {
         return new ResponseEntity<>(newAccount, HttpStatus.CREATED);
     }
 
-    @GetMapping("/getPrimaryAccount")
-    public ResponseEntity<?> getPrimaryAccount(@RequestParam String phoneNumber, @RequestParam Integer passcode) {
-        Users user = userRepository.findByPhoneNumber(phoneNumber);
-        var primaryAccount = accountRepository.findPrimaryAccount(user.getUserId());
-
-        if(primaryAccount == null) {
-            createUserResponse response = new createUserResponse(
-                    "error",
-                    "You don't have a primary account!");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    @PutMapping("/setPrimaryAccount/{phoneNumber}")
+    public ResponseEntity<?> setPrimaryAccount(@PathVariable String phoneNumber, @RequestBody Account tempAccount) {
+        var user = userRepository.findByPhoneNumber(phoneNumber);
+        if(user == null){
+            throw new ResourceNotFoundException("There is no user with this phoneNumber");
         }
-        if(primaryAccount.getPasscode() != passcode) {
-            createUserResponse response = new createUserResponse(
-                    "error",
-                    "Invalid passcode!");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-        return new ResponseEntity<>(
-                primaryAccount,
-                HttpStatus.OK);
-    }
 
-    @PutMapping("/setPrimaryAccount/{userId}")
-    public ResponseEntity<?> setPrimaryAccount(@RequestBody Account tempAccount, @PathVariable Long userId) {
-        var accounts = accountRepository.findByUser(userId);
-
+        var accounts = user.getAccounts();
         for(var account : accounts){
-            if(account.getAccountNumber() == tempAccount.getAccountNumber()){
+            if(tempAccount.getAccountNumber().equals(account.getAccountNumber())){
                 account.setIsMainAccount(true);
                 account.setPasscode(tempAccount.getPasscode());
                 continue;
@@ -69,8 +52,44 @@ public class AccountController {
             account.setIsMainAccount(false);
         }
         accountRepository.saveAll(accounts);
+        ApiResponse response = new ApiResponse(
+                "success",
+                "Your primary account has been successfully set.");
         return new ResponseEntity<>(
-                "Your primary account has been successfully set.",
+                response,
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/getPrimaryAccount/{phoneNumber}/{passcode}")
+    public ResponseEntity<?> getPrimaryAccount(@PathVariable String phoneNumber, @PathVariable Integer passcode) {
+        var user = userRepository.findByPhoneNumber(phoneNumber);
+        if(user == null){
+            throw new ResourceNotFoundException("There is no user with this phoneNumber");
+        }
+
+        var accounts = user.getAccounts();
+        Account primaryAccount = null;
+        for(var account : accounts){
+            if(account.getIsMainAccount() == true)
+                primaryAccount = account;
+        }
+
+        if(primaryAccount == null) {
+            ApiResponse response = new ApiResponse(
+                    "not_found",
+                    "You don't have a primary account.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        if(!(primaryAccount.getPasscode().equals( passcode))) {
+            ApiResponse response = new ApiResponse(
+                    "forbidden",
+                    "Invalid passcode!");
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(
+                primaryAccount,
                 HttpStatus.OK);
     }
 

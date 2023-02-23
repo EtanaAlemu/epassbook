@@ -85,7 +85,7 @@ public class AuthController {
         @PutMapping("/register")
         public ResponseEntity<?> accept(@RequestBody Users tempUser) {
             Users user = userService.registerUser(tempUser);
-            return new ResponseEntity<>("registered Successfully", HttpStatus.OK);
+            return new ResponseEntity<>("Registered Successfully", HttpStatus.OK);
         }
 
         @PostMapping("/findAccountsByPhoneNumber")

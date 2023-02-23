@@ -15,6 +15,5 @@ public class Passcode {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String passcode;
-
     private Long userId;
 }

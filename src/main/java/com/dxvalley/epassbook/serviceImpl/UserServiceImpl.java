@@ -36,7 +36,12 @@ public class UserServiceImpl implements UserService {
 
         var result = userRepository.findByUsername(tempUser.getUsername());
         if (result != null) {
-            throw new ResourceAlreadyExistsException("This username is already used.");
+            throw new ResourceAlreadyExistsException("This username is already exists.");
+        }
+
+        var result1 = userRepository.findByPhoneNumber(tempUser.getPhoneNumber());
+        if (result1 != null) {
+            throw new ResourceAlreadyExistsException("This phone number already exists.");
         }
 
         Users users = new Users();
@@ -65,6 +70,7 @@ public class UserServiceImpl implements UserService {
 
         ArrayList<Account> accounts = new ArrayList<>();
         for (var account : tempUser.getAccounts()){
+            account.setIsMainAccount(false);
             accounts.add(account);
         }
         List<Account>  accountList = accountRepository.saveAll(accounts);
