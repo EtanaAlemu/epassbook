@@ -79,13 +79,16 @@ public class AuthController {
                         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
                 }
                 otpService.sendOtp(phoneNumber.getPhoneNumber());
-                return new ResponseEntity<>(res.getBody().getUserInfo(), HttpStatus.OK);
+                var userInfo =  res.getBody().getUserInfo();
+                userInfo.setPhoneNumber(phoneNumber.getPhoneNumber());
+                return new ResponseEntity<>(userInfo, HttpStatus.OK);
         }
 
         @PutMapping("/register")
         public ResponseEntity<?> accept(@RequestBody Users tempUser) {
             Users user = userService.registerUser(tempUser);
-            return new ResponseEntity<>("Registered Successfully", HttpStatus.OK);
+            ApiResponse response = new ApiResponse("success","Registered Successfully!");
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
 
         @PostMapping("/findAccountsByPhoneNumber")
