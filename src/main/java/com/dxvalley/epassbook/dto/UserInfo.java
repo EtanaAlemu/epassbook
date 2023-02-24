@@ -9,6 +9,9 @@ import java.util.ArrayList;
 
 @Data
 public class UserInfo {
+        private String username;
+        private String password;
+        private String phoneNumber;
         private String fullName;
         private String gender;
         private String dateOfBirth;
