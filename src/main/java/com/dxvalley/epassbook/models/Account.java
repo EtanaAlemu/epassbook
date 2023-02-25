@@ -17,7 +17,7 @@ public class Account {
     private Boolean isMainAccount;
     private Integer passcode;
     private String balance;
-    
+    private Boolean status;
     public Account(String accountNumber) {
         this.accountNumber = accountNumber;
     }
