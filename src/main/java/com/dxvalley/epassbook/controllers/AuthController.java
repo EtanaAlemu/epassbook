@@ -1,7 +1,7 @@
 package com.dxvalley.epassbook.controllers;
 
 import com.dxvalley.epassbook.dto.ApiResponse;
-import com.dxvalley.epassbook.dto.UserInfo;;
+import com.dxvalley.epassbook.dto.UserInfo;
 import com.dxvalley.epassbook.services.OtpService;
 import com.dxvalley.epassbook.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,6 @@
 package com.dxvalley.epassbook.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.dxvalley.epassbook.dto.ApiResponse;
@@ -24,9 +25,22 @@ public class AccountController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/getAccounts")
-    List<Account> getUsers() {
-        return accountRepository.findAll();
+    @GetMapping("/getAccounts/{phoneNumber}")
+    List<Account> getUsers(@PathVariable String phoneNumber) {
+        var user = userRepository.findByPhoneNumber(phoneNumber);
+        if(user == null){
+            throw new ResourceNotFoundException("There is no user with this phoneNumber");
+        }
+
+        var accounts = user.getAccounts();
+        List<Account> updateAccounts = new ArrayList<>();
+        for(var account : accounts){
+            //query balance here from CBS
+            account.setBalance("12343");
+            updateAccounts.add(account);
+        }
+
+        return updateAccounts;
     }
 
     @PostMapping("/{userId}")
