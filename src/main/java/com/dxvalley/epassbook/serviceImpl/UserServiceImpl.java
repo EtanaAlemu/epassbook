@@ -71,6 +71,7 @@ public class UserServiceImpl implements UserService {
         ArrayList<Account> accounts = new ArrayList<>();
         for (var account : tempUser.getAccounts()){
             account.setIsMainAccount(false);
+            account.setStatus(false);
             accounts.add(account);
         }
         List<Account>  accountList = accountRepository.saveAll(accounts);

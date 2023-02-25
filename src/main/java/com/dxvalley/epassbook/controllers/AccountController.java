@@ -61,6 +61,19 @@ public class AccountController {
         return updateAccounts;
     }
 
+    @PatchMapping("/updateStatus/{accountNumber}/{status}")
+    ResponseEntity<?> updateStatus(@PathVariable String accountNumber, @PathVariable Boolean status) {
+        var account = accountRepository.findByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new ResourceNotFoundException("There is no Account with this Account Number");
+        }
+        account.setStatus(status);
+        accountRepository.save(account);
+        ApiResponse response = new ApiResponse("success", "Updated Success");
+        return new ResponseEntity<>(response, HttpStatus.OK) ;
+    }
+
+
     private String getAccountBalance(String accountNumber) {
         
         try {
