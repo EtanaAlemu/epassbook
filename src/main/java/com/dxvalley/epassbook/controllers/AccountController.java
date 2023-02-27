@@ -5,12 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.dxvalley.epassbook.dto.AccountResponseDTO;
 import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.dto.PrimaryAccount;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
 import com.dxvalley.epassbook.repositories.UserRepository;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.Valid;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class AccountController {
         }
 
         List<Account> accounts = new ArrayList<>();
-        AccountResponse response = new AccountResponse();
+        AccountResponseDTO response = new AccountResponseDTO();
 
         for (var account : user.getAccounts()) {
             // query balance here from CBS
@@ -48,7 +49,7 @@ public class AccountController {
 
             //check if balance response is correct here if not set balance to ""
             // if(Integer.parseInt(balance))
-    
+
             balance = getAccountBalance(account.getAccountNumber());
             // try {
             //     balance = getAccountBalance(account.getAccountNumber());
@@ -57,9 +58,13 @@ public class AccountController {
             //     balance = "";
             // }
 
-            if(account.getIsMainAccount() ==  true)
-                response.setPrimaryAccount(account);
-
+            if (account.getIsMainAccount() == true) {
+                PrimaryAccount primaryAccount = new PrimaryAccount();
+                primaryAccount.setAccountNumber(account.getAccountNumber());
+                primaryAccount.setPasscode(account.getPasscode());
+                primaryAccount.setPhoneNumber(user.getPhoneNumber());
+                response.setPrimaryAccount(primaryAccount);
+            }
             account.setBalance(balance);
             accounts.add(account);
         }
@@ -67,13 +72,6 @@ public class AccountController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @Setter
-    @Getter
-    private class AccountResponse{
-        private Account primaryAccount;
-        private List<Account> accounts = new ArrayList<>();
-
-    }
 
 
     @PatchMapping("/updateStatus/{accountNumber}/{status}")
@@ -85,20 +83,20 @@ public class AccountController {
         account.setStatus(status);
         accountRepository.save(account);
         ApiResponse response = new ApiResponse("success", "Updated Success");
-        return new ResponseEntity<>(response, HttpStatus.OK) ;
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
     private String getAccountBalance(String accountNumber) {
-        
+
         try {
             String url = "http://10.1.245.150:7081/v1/cbo/";
             RestTemplate restTemplate = new RestTemplate();
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-        
-            String reqBody = "{\"BalanceEnquiryRequest\":{\"ESBHeader\":{\"serviceCode\":\"300000\",\"channel\":\"USSD\",\"Service_name\":\"BalanceEnquiry\",\"Message_Id\":\"6255726662\"},\"WebRequestCommon\":{\"company\":\"ET0010222\",\"password\":\"123456\",\"userName\":\"MMTUSER1\"},\"ACCTBALCTSType\":[{\"columnName\":\"ACCOUNT.NUMBER\",\"criteriaValue\":\"" +accountNumber+"\",\"operand\":\"EQ\"}]}}";
+
+            String reqBody = "{\"BalanceEnquiryRequest\":{\"ESBHeader\":{\"serviceCode\":\"300000\",\"channel\":\"USSD\",\"Service_name\":\"BalanceEnquiry\",\"Message_Id\":\"6255726662\"},\"WebRequestCommon\":{\"company\":\"ET0010222\",\"password\":\"123456\",\"userName\":\"MMTUSER1\"},\"ACCTBALCTSType\":[{\"columnName\":\"ACCOUNT.NUMBER\",\"criteriaValue\":\"" + accountNumber + "\",\"operand\":\"EQ\"}]}}";
 
             HttpEntity<String> request = new HttpEntity<String>(reqBody, headers);
 
@@ -124,7 +122,7 @@ public class AccountController {
 
                 resBody.put("status", "success");
                 resBody.put("statement", String.valueOf(MINISTMT));
-                
+
                 //get account balance here 
 
                 return "132312"; //return the balance
@@ -140,7 +138,7 @@ public class AccountController {
         }
     }
 
-    
+
     @PostMapping("/{userId}")
     public ResponseEntity<Account> addAccount(@RequestBody Account account, @PathVariable Long userId) {
         Account newAccount = accountService.addAccount(account, userId);
@@ -172,37 +170,26 @@ public class AccountController {
                 HttpStatus.OK);
     }
 
-    @GetMapping("/getPrimaryAccount/{phoneNumber}/{passcode}")
-    public ResponseEntity<?> getPrimaryAccount(@PathVariable String phoneNumber, @PathVariable Integer passcode) {
-        var user = userRepository.findByPhoneNumber(phoneNumber);
+    @PostMapping("/getPrimaryAccount")
+    public ResponseEntity<?> getPrimaryAccount(@RequestBody @Valid PrimaryAccount primaryAccountRequest) {
+        var user = userRepository.findByPhoneNumber(primaryAccountRequest.getPhoneNumber());
         if (user == null) {
             throw new ResourceNotFoundException("There is no user with this phoneNumber");
         }
 
-        var accounts = user.getAccounts();
-        Account primaryAccount = null;
-        for (var account : accounts) {
-            if (account.getIsMainAccount() == true)
-                primaryAccount = account;
-        }
-
-        if (primaryAccount == null) {
-            ApiResponse response = new ApiResponse(
-                    "not_found",
-                    "You don't have a primary account.");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-
-        if (!(primaryAccount.getPasscode().equals(passcode))) {
-            ApiResponse response = new ApiResponse(
-                    "forbidden",
-                    "Invalid passcode!");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
-        }
-
-        return new ResponseEntity<>(
-                primaryAccount,
-                HttpStatus.OK);
+        PrimaryAccount primaryAccount = new PrimaryAccount();
+        for (var account : user.getAccounts()) {
+            if (account.getIsMainAccount() == true) {
+                if (account.getPasscode().equals(primaryAccountRequest.getPasscode())) {
+                    primaryAccount.setAccountNumber(account.getAccountNumber());
+                    primaryAccount.setPasscode(account.getPasscode());
+                    primaryAccount.setPhoneNumber(user.getPhoneNumber());
+                    return new ResponseEntity<>(primaryAccount, HttpStatus.OK);
+                }
+                ApiResponse response = new ApiResponse("unauthorized","Invalid passcode!");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+                }
+            }
+        throw new ResourceNotFoundException("You don't have a primary account");
     }
-
 }
