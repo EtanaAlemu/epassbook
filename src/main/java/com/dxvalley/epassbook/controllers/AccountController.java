@@ -68,6 +68,7 @@ public class AccountController {
             account.setBalance(balance);
             accounts.add(account);
         }
+
         response.setAccounts(accounts);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -105,27 +106,24 @@ public class AccountController {
             HttpHeaders resHeaders = new HttpHeaders();
             resHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-            System.out.println(response.getBody());
-
             JSONObject ESBStatus = new JSONObject(response.getBody())
                     .getJSONObject("BalanceEnquiryResponse")
                     .getJSONObject("ESBStatus");
             Map<String, String> resBody = new HashMap();
 
-
-            if (ESBStatus.getString("Status").equals("Success")) {
-                JSONArray MINISTMT = new JSONObject(response.getBody())
+            if (ESBStatus.getString("status").equals("Success")) {
+                String balance = new JSONObject(response.getBody())
                         .getJSONObject("BalanceEnquiryResponse")
-                        .getJSONObject("EMMTMINISTMTType")
-                        .getJSONObject("gEMMTMINISTMTDetailType")
-                        .getJSONArray("mEMMTMINISTMTDetailType");
+                        .getJSONObject("ACCTBALCTSType")
+                        .getJSONObject("gACCTBALCTSDetailType")
+                        .getJSONObject("mACCTBALCTSDetailType")
+                        .getJSONObject("mACCTBALCTSDetailType")
+                        .getString("WorkingBal");
 
                 resBody.put("status", "success");
-                resBody.put("statement", String.valueOf(MINISTMT));
+                resBody.put("statement", String.valueOf(balance));
 
-                //get account balance here 
-
-                return "132312"; //return the balance
+                return balance; //return the balance
             } else {
 
                 // return ESBStatus.getString("errorDescription");
@@ -133,6 +131,7 @@ public class AccountController {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             return "";
             // return e.toString();
         }
