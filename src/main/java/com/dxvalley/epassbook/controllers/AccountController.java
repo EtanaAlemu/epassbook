@@ -38,15 +38,15 @@ public class AccountController {
         }
 
         var accounts = user.getAccounts();
-        List<Account> updateAccounts = new ArrayList<>();
+        List<Account> updatedAccounts = new ArrayList<>();
         for (var account : accounts) {
             // query balance here from CBS
             String balance;
+            balance = getAccountBalance(account.getAccountNumber());
 
             //check if balance response is correct here if not set balance to ""
             // if(Integer.parseInt(balance))
     
-            balance = getAccountBalance(account.getAccountNumber());
             // try {
             //     balance = getAccountBalance(account.getAccountNumber());
             //     Integer.parseInt(balance);
@@ -55,10 +55,10 @@ public class AccountController {
             // }
 
             account.setBalance(balance);
-            updateAccounts.add(account);
+            updatedAccounts.add(account);
         }
 
-        return updateAccounts;
+        return updatedAccounts;
     }
 
     private String getAccountBalance(String accountNumber) {
@@ -84,19 +84,15 @@ public class AccountController {
             JSONObject ESBStatus = new JSONObject(response.getBody())
                     .getJSONObject("BalanceEnquiryResponse")
                     .getJSONObject("ESBStatus");
-            Map<String, String> resBody = new HashMap();
 
 
             if (ESBStatus.getString("Status").equals("Success")) {
-                JSONArray MINISTMT = new JSONObject(response.getBody())
+                JSONArray balance = new JSONObject(response.getBody())
                         .getJSONObject("BalanceEnquiryResponse")
                         .getJSONObject("EMMTMINISTMTType")
                         .getJSONObject("gEMMTMINISTMTDetailType")
                         .getJSONArray("mEMMTMINISTMTDetailType");
-
-                resBody.put("status", "success");
-                resBody.put("statement", String.valueOf(MINISTMT));
-                
+                        
                 //get account balance here 
 
                 return "132312"; //return the balance
