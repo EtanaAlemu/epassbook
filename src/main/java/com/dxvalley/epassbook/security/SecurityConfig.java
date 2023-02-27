@@ -46,8 +46,7 @@ public class SecurityConfig {
         .cors().and()
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
         .authorizeHttpRequests(auth -> {
-          auth.requestMatchers("/**").permitAll();
-          // auth.requestMatchers("/api/**").hasAuthority("equbUser");
+          auth.requestMatchers("/api/auth/**").permitAll();
         })
         .addFilter(new JwtAuthenticationFilter(authenticationManager(authenticationConfiguration)))
         .addFilterBefore(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
