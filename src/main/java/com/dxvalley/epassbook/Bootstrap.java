@@ -23,7 +23,7 @@ public class Bootstrap {
     Role userRole = new Role("user", "End System User");
     Role admin = new Role("admin", "System Administrator");
     Role sysAdmin = new Role("sysAdmin", "Highest Level System Administrator");
-    Address address = new Address("+251924385314", "elshadayt@coopbankoromia.com.et", "Addis Ababa", "Lideta", "01",
+    Address address = new Address("967434568", "johndoe@coopbankoromia.com.et", "Addis Ababa", "Lideta", "01",
             "312");
     Users user = new Users("johndoe", "123456", "John Doe", "johndoe@coopbankoromia.com.et", true, "MALE", 
             "07-09-1999", "/image.png", "198.1.13.2", "01-09-2022", null, 1, "967434568", 0, false, true);
@@ -43,6 +43,7 @@ public class Bootstrap {
             AddressRepository addressRepo) {
         setUp();
         return args -> {
+            log.info("Preloading " + roleRepository.save(userRole));
             log.info("Preloading " + roleRepository.save(admin));
             log.info("Preloading " + roleRepository.save(sysAdmin));
             log.info("Preloading " + userRepository.save(user));

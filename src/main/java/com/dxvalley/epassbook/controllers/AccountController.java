@@ -9,6 +9,8 @@ import com.dxvalley.epassbook.dto.ApiResponse;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
 import com.dxvalley.epassbook.repositories.UserRepository;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +33,16 @@ public class AccountController {
     private UserRepository userRepository;
 
     @GetMapping("/getAccounts/{phoneNumber}")
-    List<Account> getUsers(@PathVariable String phoneNumber) {
+    ResponseEntity<?> getUsers(@PathVariable String phoneNumber) {
         var user = userRepository.findByPhoneNumber(phoneNumber);
         if (user == null) {
             throw new ResourceNotFoundException("There is no user with this phoneNumber");
         }
 
-        var accounts = user.getAccounts();
-        List<Account> updateAccounts = new ArrayList<>();
-        for (var account : accounts) {
+        List<Account> accounts = new ArrayList<>();
+        AccountResponse response = new AccountResponse();
+
+        for (var account : user.getAccounts()) {
             // query balance here from CBS
             String balance;
 
@@ -54,12 +57,24 @@ public class AccountController {
             //     balance = "";
             // }
 
-            account.setBalance(balance);
-            updateAccounts.add(account);
-        }
+            if(account.getIsMainAccount() ==  true)
+                response.setPrimaryAccount(account);
 
-        return updateAccounts;
+            account.setBalance(balance);
+            accounts.add(account);
+        }
+        response.setAccounts(accounts);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @Setter
+    @Getter
+    private class AccountResponse{
+        private Account primaryAccount;
+        private List<Account> accounts = new ArrayList<>();
+
+    }
+
 
     @PatchMapping("/updateStatus/{accountNumber}/{status}")
     ResponseEntity<?> updateStatus(@PathVariable String accountNumber, @PathVariable Boolean status) {
