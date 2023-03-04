@@ -33,12 +33,11 @@ public class AccountController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/getAccounts/{phoneNumber}")
-    ResponseEntity<?> getUsers(@PathVariable String phoneNumber) {
-        var user = userRepository.findByPhoneNumber(phoneNumber);
-        if (user == null) {
-            throw new ResourceNotFoundException("There is no user with this phoneNumber");
-        }
+    @GetMapping("/getAccounts/{username}")
+    ResponseEntity<?> getUsers(@PathVariable String username) {
+        var user = userRepository.findByUsername(username);
+        if (user == null)
+            throw new ResourceNotFoundException("There is no user with this username");
 
         List<Account> accounts = new ArrayList<>();
         AccountResponseDTO response = new AccountResponseDTO();
@@ -144,12 +143,11 @@ public class AccountController {
         return new ResponseEntity<>(newAccount, HttpStatus.CREATED);
     }
 
-    @PutMapping("/setPrimaryAccount/{phoneNumber}")
-    public ResponseEntity<?> setPrimaryAccount(@PathVariable String phoneNumber, @RequestBody Account tempAccount) {
-        var user = userRepository.findByPhoneNumber(phoneNumber);
-        if (user == null) {
-            throw new ResourceNotFoundException("There is no user with this phoneNumber");
-        }
+    @PutMapping("/setPrimaryAccount/{username}")
+    public ResponseEntity<?> setPrimaryAccount(@PathVariable String username, @RequestBody Account tempAccount) {
+        var user = userRepository.findByUsername(username);
+        if (user == null)
+            throw new ResourceNotFoundException("There is no user with this username");
 
         var accounts = user.getAccounts();
         for (var account : accounts) {
