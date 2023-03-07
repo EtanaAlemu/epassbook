@@ -2,7 +2,9 @@ package com.dxvalley.epassbook.controllers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+//import org.json.simple.parser.JSONParser;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,8 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,10 +60,10 @@ public class MiniStatementController {
             JSONObject ESBStatus = new JSONObject(response.getBody())
                     .getJSONObject("MiniStatementResponse")
                     .getJSONObject("ESBStatus");
-            Map<String, String> resBody = new HashMap();
+            Map<String, Object> resBody = new HashMap();
 
 
-            if (ESBStatus.getString("Status").equals("Success")) {
+            if (ESBStatus.getString("status").equals("Success")) {
                 JSONArray MINISTMT = new JSONObject(response.getBody())
                         .getJSONObject("MiniStatementResponse")
                         .getJSONObject("EMMTMINISTMTType")
@@ -70,7 +71,27 @@ public class MiniStatementController {
                         .getJSONArray("mEMMTMINISTMTDetailType");
 
                 resBody.put("status", "success");
-                resBody.put("statement", String.valueOf(MINISTMT));
+//                JSONParser parser = new JSONParser();
+                ArrayList<Statement> statements = new ArrayList<>();
+                for(int i=0; i < MINISTMT.length(); i++)
+                {
+//                    JSONObject json = (JSONObject) parser.parse(String.valueOf(MINISTMT.getJSONObject(i)));
+                    JSONObject json = MINISTMT.getJSONObject(i);
+                    Statement s = new Statement();
+
+                    s.TXNREF = json.getString("TXNREF");
+                    s.CRAMT = json.getString("CRAMT");
+                    s.DRAMT = json.getString("DRAMT");
+                    s.DATE = json.getString("DATE");
+                    s.DESC = json.getString("DESC");
+                    if(json.getJSONObject("BALANCE").isEmpty())
+                    s.BALANCE = "";
+                    else
+                    s.BALANCE = json.getString("BALANCE");
+                    statements.add(s);
+                }
+
+                resBody.put("statement", statements);
                 ResponseEntity<?> res = new ResponseEntity<>(
                         resBody
                         , resHeaders,
@@ -94,6 +115,41 @@ public class MiniStatementController {
         }
     }
 
+    public static Map<String, Object> toMap(JSONObject object) throws JSONException {
+        Map<String, Object> map = new HashMap<String, Object>();
+
+        Iterator<String> keysItr = object.keys();
+        while(keysItr.hasNext()) {
+            String key = keysItr.next();
+            Object value = object.get(key);
+
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
+
+    public static List<Object> toList(JSONArray array) throws JSONException {
+        List<Object> list = new ArrayList<Object>();
+        for(int i = 0; i < array.length(); i++) {
+            Object value = array.get(i);
+            if(value instanceof JSONArray) {
+                value = toList((JSONArray) value);
+            }
+
+            else if(value instanceof JSONObject) {
+                value = toMap((JSONObject) value);
+            }
+            list.add(value);
+        }
+        return list;
+    }
 }
 @Getter
 @Builder
@@ -102,5 +158,20 @@ public class MiniStatementController {
 class MiniStatement{
 
     String accountNumber;
+
+}
+
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+class Statement{
+
+    String TXNREF;
+    String CRAMT;
+    String DRAMT;
+    String DATE;
+    String DESC;
+    String BALANCE;
 
 }
