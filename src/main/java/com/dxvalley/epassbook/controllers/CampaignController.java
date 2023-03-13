@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
+import com.dxvalley.epassbook.dto.ApiResponse;
 import com.dxvalley.epassbook.dto.CampaignDTO;
 import com.dxvalley.epassbook.dto.CampaignListDTO;
 
@@ -41,7 +42,8 @@ public class CampaignController {
 
         } catch (Exception e) {
             // e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(),  HttpStatus.OK);
+           ApiResponse resp = new ApiResponse("error", "Connection refused to crowfunding server.");
+            return new ResponseEntity<>(resp,  HttpStatus.EXPECTATION_FAILED);
         }
     }
 }
