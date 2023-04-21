@@ -1,5 +1,6 @@
-package com.dxvalley.epassbook.dto;
+package com.dxvalley.epassbook.utils;
 
+import com.dxvalley.epassbook.dto.UserDTO;
 import lombok.*;
 
 @Setter
