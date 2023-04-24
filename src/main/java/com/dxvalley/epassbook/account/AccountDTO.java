@@ -1,4 +1,4 @@
-package com.dxvalley.epassbook.dto;
+package com.dxvalley.epassbook.account;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
