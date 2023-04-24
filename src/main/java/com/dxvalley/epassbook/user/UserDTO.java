@@ -1,5 +1,7 @@
-package com.dxvalley.epassbook.dto;
+package com.dxvalley.epassbook.user;
 
+import com.dxvalley.epassbook.account.AccountDTO;
+import com.dxvalley.epassbook.user.address.AddressDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

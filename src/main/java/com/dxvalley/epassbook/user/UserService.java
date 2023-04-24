@@ -1,16 +1,16 @@
-package com.dxvalley.epassbook.services;
+package com.dxvalley.epassbook.user;
 
-import com.dxvalley.epassbook.dto.ChangePinDTO;
-import com.dxvalley.epassbook.dto.UserDTO;
-import com.dxvalley.epassbook.dto.UserInfoDTO;
-import com.dxvalley.epassbook.models.Users;
+import com.dxvalley.epassbook.utils.ChangePinDTO;
 import org.springframework.http.ResponseEntity;
 
 public interface UserService {
-    Users registerUser(UserDTO userDTO);
+    ResponseEntity registerUser(UserDTO userDTO);
+
     ResponseEntity changePin(String username, ChangePinDTO changePinDTO);
-    Users getUserByUsername(String username);
-    Users getUserByPhoneNumber(String phoneNumber);
+
+    ResponseEntity getUserByUsername(String username);
+
+    Users utilGetUserByUsername(String username);
+
     ResponseEntity checkUserExistenceAndSendOTP(String phoneNumber);
-    Users getUserById(Long userId);
 }
