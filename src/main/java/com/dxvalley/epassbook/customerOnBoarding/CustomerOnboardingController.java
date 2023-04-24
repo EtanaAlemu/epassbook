@@ -1,4 +1,4 @@
-package com.dxvalley.epassbook.controllers;
+package com.dxvalley.epassbook.customerOnBoarding;
 
 import lombok.*;
 import org.json.JSONArray;

@@ -1,4 +1,4 @@
-package com.dxvalley.epassbook.dto;
+package com.dxvalley.epassbook.jigiiFund;
 
 import lombok.Data;
 
