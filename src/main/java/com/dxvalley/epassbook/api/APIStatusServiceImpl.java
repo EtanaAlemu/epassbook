@@ -1,8 +1,5 @@
-package com.dxvalley.epassbook.services.impl;
+package com.dxvalley.epassbook.api;
 
-import com.dxvalley.epassbook.models.APIStatus;
-import com.dxvalley.epassbook.repositories.APIStatusRepository;
-import com.dxvalley.epassbook.services.APIStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
