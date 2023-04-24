@@ -1,9 +1,6 @@
-package com.dxvalley.epassbook.controllers;
+package com.dxvalley.epassbook.otp;
 
-import com.dxvalley.epassbook.dto.ApiResponse;
-import com.dxvalley.epassbook.services.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +12,7 @@ public class OtpController {
 
     @PutMapping("/verify/{otpCode}")
     public ResponseEntity<?> verifyOtp(@PathVariable String otpCode) {
-        if (otpService.verifyOTP(otpCode))
-            return ApiResponse.success("Verified successfully");
-
-        return ApiResponse.error(HttpStatus.BAD_REQUEST, "This OTP has already expired. Please try again.");
+        return otpService.verifyOTP(otpCode);
     }
 
     @PostMapping("/sendOTP/{username}")

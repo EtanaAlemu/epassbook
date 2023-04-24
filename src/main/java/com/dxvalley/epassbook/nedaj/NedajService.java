@@ -1,6 +1,6 @@
 package com.dxvalley.epassbook.nedaj;
 
-import com.dxvalley.epassbook.utils.ApiResponse;
+import com.dxvalley.epassbook.dto.ApiResponse;
 import com.dxvalley.epassbook.exceptions.AppConnectException;
 import com.dxvalley.epassbook.exceptions.ResourceAlreadyExistsException;
 import com.dxvalley.epassbook.user.UserService;

@@ -1,18 +1,17 @@
 package com.dxvalley.epassbook.security;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
+import com.dxvalley.epassbook.user.UserRepository;
+import com.dxvalley.epassbook.user.Users;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.dxvalley.epassbook.models.Users;
-import com.dxvalley.epassbook.repositories.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +20,9 @@ public class CustomUserDeatailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = userRepository.findByUsername(username);
+        Users user = userRepository.findByUsername(username).orElseThrow(
+                () -> new ResourceNotFoundException("User not found")
+        );
         if (user != null) {
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
             user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getRoleName())));

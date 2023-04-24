@@ -1,9 +1,6 @@
-package com.dxvalley.epassbook.controllers;
+package com.dxvalley.epassbook.account;
 
 import com.dxvalley.epassbook.dto.ApiResponse;
-import com.dxvalley.epassbook.dto.PrimaryAccount;
-import com.dxvalley.epassbook.models.Account;
-import com.dxvalley.epassbook.services.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

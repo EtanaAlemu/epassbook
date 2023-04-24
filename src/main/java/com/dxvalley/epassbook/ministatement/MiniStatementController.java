@@ -1,8 +1,6 @@
-package com.dxvalley.epassbook.controllers;
+package com.dxvalley.epassbook.ministatement;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-//import org.json.simple.parser.JSONParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

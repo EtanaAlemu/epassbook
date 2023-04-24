@@ -1,8 +1,8 @@
-package com.dxvalley.epassbook.dto;
+package com.dxvalley.epassbook.account;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Data;
 
 @Data
 public class PrimaryAccount {

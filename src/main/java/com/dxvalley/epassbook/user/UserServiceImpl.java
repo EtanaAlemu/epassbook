@@ -1,16 +1,16 @@
 package com.dxvalley.epassbook.user;
 
-import com.dxvalley.epassbook.utils.ApiResponse;
-import com.dxvalley.epassbook.utils.ChangePinDTO;
+import com.dxvalley.epassbook.account.AccountService;
+import com.dxvalley.epassbook.appConnect.CBOUserService;
+import com.dxvalley.epassbook.dto.ApiResponse;
 import com.dxvalley.epassbook.exceptions.ResourceAlreadyExistsException;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
-import com.dxvalley.epassbook.user.address.Address;
-import com.dxvalley.epassbook.account.AccountService;
-import com.dxvalley.epassbook.user.address.AddressService;
 import com.dxvalley.epassbook.otp.OtpService;
-import com.dxvalley.epassbook.appConnect.CBOUserService;
+import com.dxvalley.epassbook.user.address.Address;
+import com.dxvalley.epassbook.user.address.AddressService;
 import com.dxvalley.epassbook.user.role.Role;
 import com.dxvalley.epassbook.user.role.RoleRepository;
+import com.dxvalley.epassbook.utils.ChangePinDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity getUserByUsername(String username) {
+    public ResponseEntity<?> getUserByUsername(String username) {
         Users user = utilGetUserByUsername(username);
         user.setPassword(null);
         return ApiResponse.success(user);

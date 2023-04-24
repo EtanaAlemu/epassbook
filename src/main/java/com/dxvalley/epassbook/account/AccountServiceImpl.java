@@ -1,12 +1,13 @@
 package com.dxvalley.epassbook.account;
 
-import com.dxvalley.epassbook.utils.ApiResponse;
-import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
-import com.dxvalley.epassbook.user.Users;
-import com.dxvalley.epassbook.user.UserRepository;
 import com.dxvalley.epassbook.appConnect.CBOAccountService;
+import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
+import com.dxvalley.epassbook.user.UserRepository;
+import com.dxvalley.epassbook.user.Users;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class AccountServiceImpl implements AccountService {
     UserRepository userRepository;
     @Autowired
     AccountRepository accountRepository;
+
     @Override
     public Account addAccount(Account account, Long userId) {
         Users users = userRepository.getById(userId);
@@ -29,16 +31,16 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account changeAccountStatus(String accountNumber, Boolean status) {
-            Account account = accountRepository.findByAccountNumber(accountNumber)
-                    .orElseThrow(() -> new ResourceNotFoundException("There is no Account with this Account Number"));
-            account.setStatus(status);
-            return accountRepository.save(account);
-        }
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("There is no Account with this Account Number"));
+        account.setStatus(status);
+        return accountRepository.save(account);
+    }
 
     @Override
     public AccountsResponseDTO getAccountsByUsername(String username) {
         var user = userRepository.findByUsername(username).
-                orElseThrow(() -> new ResourceNotFoundException("There is no user with this username."));;
+                orElseThrow(() -> new ResourceNotFoundException("There is no user with this username."));
 
         AccountsResponseDTO response = new AccountsResponseDTO();
         for (var account : user.getAccounts()) {
@@ -69,30 +71,30 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account setPrimaryAccount(String username, Account tempAccount) {
-            Users user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
-            List<Account> accounts = user.getAccounts();
+        List<Account> accounts = user.getAccounts();
 
-            Account primaryAccount = accounts.stream()
-                    .filter(account -> account.getAccountNumber().equals(tempAccount.getAccountNumber()))
-                    .findFirst()
-                    .orElseThrow(() -> new ResourceNotFoundException("Account not found."));
+        Account primaryAccount = accounts.stream()
+                .filter(account -> account.getAccountNumber().equals(tempAccount.getAccountNumber()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found."));
 
-            user.getAccounts().forEach(account -> {
-                if (account.equals(primaryAccount)) {
-                    account.setIsMainAccount(true);
-                    account.setPasscode(tempAccount.getPasscode());
-                } else {
-                    account.setIsMainAccount(false);
-                    account.setPasscode(null);
-                }
-            });
+        user.getAccounts().forEach(account -> {
+            if (account.equals(primaryAccount)) {
+                account.setIsMainAccount(true);
+                account.setPasscode(tempAccount.getPasscode());
+            } else {
+                account.setIsMainAccount(false);
+                account.setPasscode(null);
+            }
+        });
 
-            accountRepository.saveAll(accounts);
+        accountRepository.saveAll(accounts);
 
-            return primaryAccount;
-        }
+        return primaryAccount;
+    }
 
     @Override
     public ResponseEntity<?> getPrimaryAccount(PrimaryAccount primaryAccountRequest) {
@@ -108,7 +110,7 @@ public class AccountServiceImpl implements AccountService {
 
         Account primaryAccount = optionalPrimaryAccount.get();
         if (!primaryAccount.getPasscode().equals(primaryAccountRequest.getPasscode()))
-            return ApiResponse.error(HttpStatus.UNAUTHORIZED,"Invalid passcode!");
+            return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Invalid passcode!");
 
         PrimaryAccount response = new PrimaryAccount();
         response.setAccountNumber(primaryAccount.getAccountNumber());

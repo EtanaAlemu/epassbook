@@ -1,7 +1,10 @@
 package com.dxvalley.epassbook.utils;
 
-import com.dxvalley.epassbook.dto.UserDTO;
-import lombok.*;
+import com.dxvalley.epassbook.user.UserDTO;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Setter
 @Getter

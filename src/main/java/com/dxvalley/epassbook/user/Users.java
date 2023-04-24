@@ -1,13 +1,17 @@
-package com.dxvalley.epassbook.models;
+package com.dxvalley.epassbook.user;
 
-import lombok.*;
+import com.dxvalley.epassbook.account.Account;
+import com.dxvalley.epassbook.user.address.Address;
+import com.dxvalley.epassbook.user.role.Role;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import jakarta.persistence.*;
 
 @Entity
 @Getter

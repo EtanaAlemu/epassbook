@@ -1,4 +1,4 @@
-package com.dxvalley.epassbook.user;
+package com.dxvalley.epassbook.user.address;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,13 +1,9 @@
-package com.dxvalley.epassbook.controllers;
+package com.dxvalley.epassbook.user;
 
+import com.dxvalley.epassbook.account.Account;
 import com.dxvalley.epassbook.dto.ApiResponse;
-import com.dxvalley.epassbook.dto.ChangePinDTO;
-import com.dxvalley.epassbook.dto.UserDTO;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
-import com.dxvalley.epassbook.models.Account;
-import com.dxvalley.epassbook.models.Users;
-import com.dxvalley.epassbook.repositories.UserRepository;
-import com.dxvalley.epassbook.services.UserService;
+import com.dxvalley.epassbook.utils.ChangePinDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,10 +35,6 @@ public class UserController {
         return userRepository.findAll();
     }
 
-    @GetMapping("/getUserById/{userId}")
-    public ResponseEntity<?> getByUserId(@PathVariable Long userId) {
-        return ApiResponse.success(userService.getUserById(userId));
-    }
 
     @GetMapping("/getUserByPhone/{username}")
     public ResponseEntity<?> getByUsername(@PathVariable String username) {

@@ -1,6 +1,5 @@
-package com.dxvalley.epassbook.repositories;
+package com.dxvalley.epassbook.api;
 
-import com.dxvalley.epassbook.models.APIStatus;
 import org.springframework.data.repository.CrudRepository;
 
 public interface APIStatusRepository extends CrudRepository<APIStatus, Short> {

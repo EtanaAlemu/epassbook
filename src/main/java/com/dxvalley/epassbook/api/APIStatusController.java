@@ -1,7 +1,5 @@
-package com.dxvalley.epassbook.controllers;
+package com.dxvalley.epassbook.api;
 
-import com.dxvalley.epassbook.models.APIStatus;
-import com.dxvalley.epassbook.services.APIStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

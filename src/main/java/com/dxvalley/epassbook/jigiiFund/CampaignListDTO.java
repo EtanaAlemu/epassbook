@@ -1,6 +1,7 @@
-package com.dxvalley.epassbook.dto;
+package com.dxvalley.epassbook.jigiiFund;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CampaignListDTO {
     List<CampaignDTO> campaigns;

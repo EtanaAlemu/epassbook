@@ -1,4 +1,4 @@
-package com.dxvalley.epassbook.models;
+package com.dxvalley.epassbook.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;

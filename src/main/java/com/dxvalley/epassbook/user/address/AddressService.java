@@ -1,10 +1,10 @@
-package com.dxvalley.epassbook.services;
+package com.dxvalley.epassbook.user.address;
 
-import com.dxvalley.epassbook.dto.AddressDTO;
-import com.dxvalley.epassbook.models.Address;
+import org.springframework.http.ResponseEntity;
 
 public interface AddressService {
-  void editAddress(Address oldAddress, Address newAddress);
-  Address saveAddress(AddressDTO addressDTO);
+    ResponseEntity updateAddress(String username, AddressDTO addressDTO);
+
+    Address saveAddress(AddressDTO addressDTO);
 
 }

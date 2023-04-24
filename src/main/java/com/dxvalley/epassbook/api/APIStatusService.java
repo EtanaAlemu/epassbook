@@ -1,8 +1,6 @@
-package com.dxvalley.epassbook.services;
+package com.dxvalley.epassbook.api;
 
-import com.dxvalley.epassbook.models.APIStatus;
 
-import java.util.List;
 
 public interface APIStatusService {
     APIStatus getApiStatus();
