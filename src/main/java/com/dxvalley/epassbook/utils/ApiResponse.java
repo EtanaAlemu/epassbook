@@ -1,13 +1,11 @@
-package com.dxvalley.epassbook.dto;
+package com.dxvalley.epassbook.utils;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@Getter
-@Setter
+@Data
 public class ApiResponse<T> {
     private HttpStatus status;
     private String message;

@@ -1,18 +1,22 @@
 package com.dxvalley.epassbook.account;
 
+import com.dxvalley.epassbook.account.dto.AccountDTO;
+import com.dxvalley.epassbook.account.dto.AccountNumberDTO;
+import com.dxvalley.epassbook.account.dto.AccountsResponseDTO;
+import com.dxvalley.epassbook.account.dto.PrimaryAccountDTO;
 import com.dxvalley.epassbook.appConnect.CBOAccountService;
-import com.dxvalley.epassbook.dto.ApiResponse;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
 import com.dxvalley.epassbook.user.UserRepository;
 import com.dxvalley.epassbook.user.Users;
+import com.dxvalley.epassbook.utils.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -54,9 +58,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> saveAccounts(List<AccountDTO> accountsDTO) {
-        ArrayList<Account> accounts = new ArrayList<>();
-        for (AccountDTO accountDTO : accountsDTO) {
+    public List<Account> saveAccounts(List<AccountDTO> accountDTOs) {
+        List<Account> accounts = accountDTOs.stream().map(accountDTO -> {
             Account account = new Account();
             account.setAccountNumber(accountDTO.getAccountNumber());
             account.setAccountTitle(accountDTO.getAccountTitle());
@@ -64,9 +67,25 @@ public class AccountServiceImpl implements AccountService {
             account.setBranchName(accountDTO.getBranchName());
             account.setIsMainAccount(false);
             account.setStatus(false);
-            accounts.add(account);
-        }
+            return account;
+        }).collect(Collectors.toList());
+
+        accounts.get(0).setIsMainAccount(true);
         return accountRepository.saveAll(accounts);
+    }
+
+    @Override
+    public AccountNumberDTO getAccountByPhoneNumber(String phoneNumber) {
+        Users user = userRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found.Please use CooPass to register."));
+
+        List<Account> accounts = user.getAccounts();
+        Account primaryAccount = accounts.stream()
+                .filter(account -> account.getIsMainAccount())
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found."));
+
+        return new AccountNumberDTO(primaryAccount.getAccountNumber());
     }
 
     @Override
@@ -97,7 +116,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public ResponseEntity<?> getPrimaryAccount(PrimaryAccount primaryAccountRequest) {
+    public ResponseEntity<?> getPrimaryAccount(PrimaryAccountDTO primaryAccountRequest) {
         Users user = userRepository.findByPhoneNumber(primaryAccountRequest.getPhoneNumber())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
@@ -112,7 +131,7 @@ public class AccountServiceImpl implements AccountService {
         if (!primaryAccount.getPasscode().equals(primaryAccountRequest.getPasscode()))
             return ApiResponse.error(HttpStatus.UNAUTHORIZED, "Invalid passcode!");
 
-        PrimaryAccount response = new PrimaryAccount();
+        PrimaryAccountDTO response = new PrimaryAccountDTO();
         response.setAccountNumber(primaryAccount.getAccountNumber());
         response.setPasscode(primaryAccount.getPasscode());
         response.setPhoneNumber(user.getPhoneNumber());

@@ -1,6 +1,6 @@
 package com.dxvalley.epassbook.user.address;
 
-import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.utils.ApiResponse;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
 import com.dxvalley.epassbook.user.UserRepository;
 import lombok.RequiredArgsConstructor;

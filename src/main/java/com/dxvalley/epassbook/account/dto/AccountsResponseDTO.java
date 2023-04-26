@@ -1,5 +1,6 @@
-package com.dxvalley.epassbook.account;
+package com.dxvalley.epassbook.account.dto;
 
+import com.dxvalley.epassbook.account.Account;
 import lombok.Data;
 
 import java.util.ArrayList;

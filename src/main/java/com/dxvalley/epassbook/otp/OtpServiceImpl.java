@@ -1,8 +1,8 @@
 package com.dxvalley.epassbook.otp;
 
-import com.dxvalley.epassbook.dto.ApiResponse;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
 import com.dxvalley.epassbook.user.UserRepository;
+import com.dxvalley.epassbook.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;

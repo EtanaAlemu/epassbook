@@ -1,7 +1,7 @@
 package com.dxvalley.epassbook.user;
 
 import com.dxvalley.epassbook.account.Account;
-import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.utils.ApiResponse;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
 import com.dxvalley.epassbook.utils.ChangePinDTO;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,9 @@
 package com.dxvalley.epassbook.nedaj;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-public interface NedajRepository extends JpaRepository<Nedaj, Long> {
 
+import java.util.Optional;
+
+public interface NedajRepository extends JpaRepository<Nedaj, Long> {
+    Optional<Nedaj> findByMessageId(String messageId);
 }
