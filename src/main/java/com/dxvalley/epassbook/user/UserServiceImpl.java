@@ -2,7 +2,7 @@ package com.dxvalley.epassbook.user;
 
 import com.dxvalley.epassbook.account.AccountService;
 import com.dxvalley.epassbook.appConnect.CBOUserService;
-import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.utils.ApiResponse;
 import com.dxvalley.epassbook.exceptions.ResourceAlreadyExistsException;
 import com.dxvalley.epassbook.exceptions.ResourceNotFoundException;
 import com.dxvalley.epassbook.otp.OtpService;

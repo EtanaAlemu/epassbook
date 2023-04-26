@@ -1,6 +1,6 @@
 package com.dxvalley.epassbook.jigiiFund;
 
-import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.utils.ApiResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
