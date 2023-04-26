@@ -1,11 +1,9 @@
 package com.dxvalley.epassbook.nedaj;
 
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Setter
-@Getter
+@Data
 public class NedajRequest {
     @NotEmpty
     private String merchantId;

@@ -1,30 +1,65 @@
 package com.dxvalley.epassbook.nedaj;
 
-import com.dxvalley.epassbook.dto.ApiResponse;
 import com.dxvalley.epassbook.exceptions.AppConnectException;
 import com.dxvalley.epassbook.exceptions.ResourceAlreadyExistsException;
 import com.dxvalley.epassbook.user.UserService;
+import com.dxvalley.epassbook.user.Users;
+import com.dxvalley.epassbook.utils.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NedajService {
     private final NedajRepository nedajRepository;
     private final UserService userService;
+    private final DateTimeFormatter dateTimeFormatter;
 
+    @Transactional
     public ResponseEntity<?> handleNedajRequest(String username, NedajRequest nedajRequest) {
-        userService.utilGetUserByUsername(username);
-        NedajResponse gateWayResponse = sendToGateWay(nedajRequest);
-        saveNedaj(username, gateWayResponse);
-        return ApiResponse.success("Your account is debited " + gateWayResponse.getDEBITAMOUNT() + " birr for fuel payment");
-    }
+        checkUniquenessOFMessageId(nedajRequest.getMessageId());
 
+        Users user = userService.utilGetUserByUsername(username);
+        Nedaj nedaj = new Nedaj();
+
+        nedaj.setUser(user);
+        nedaj.setAgentId(nedajRequest.getAgentId());
+        nedaj.setMerchantId(nedajRequest.getMerchantId());
+        nedaj.setFuelType(nedajRequest.getFuelType());
+        nedaj.setMessageId(nedajRequest.getMessageId());
+        nedaj.setDebitAcctNo(nedajRequest.getDebitAccount());
+        nedaj.setDebitAmount(nedajRequest.getDebitAmount());
+        nedaj.setTransactionOrderedDate(LocalDateTime.now().format(dateTimeFormatter));
+
+        log.error("Nedaj Payment Request => {}", nedaj);
+        try {
+            NedajResponse gateWayResponse = sendToGateWay(nedajRequest);
+
+            nedaj.setTransactionID(gateWayResponse.getTransactionID());
+            nedaj.setTransactionCompletedDate(gateWayResponse.getTRANSACTION_DATE());
+            nedaj.setPaymentStatus(gateWayResponse.getSTATUS().toUpperCase());
+            var succeedNedajPayment = nedajRepository.save(nedaj);
+
+            log.error("Succeed Nedaj Payment => {}", succeedNedajPayment);
+            return ApiResponse.success("Your account is debited " + gateWayResponse.getDEBITAMOUNT() + " birr for fuel payment");
+        } catch (Exception ex) {
+            nedaj.setPaymentStatus("FAILED");
+            var failedNedajPayment = nedajRepository.save(nedaj);
+
+            log.error("Failed nedaj Payment => {}", failedNedajPayment);
+            log.error(ex.getMessage());
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Currently, we cannot process Nedaj payments. Please try again later. Thank you.");
+        }
+    }
 
     public NedajResponse sendToGateWay(NedajRequest nedajRequest) {
         try {
@@ -49,44 +84,16 @@ public class NedajService {
             if (response.getStatusCode() == HttpStatus.OK)
                 return response.getBody();
 
-            throw new ResourceAlreadyExistsException("A transaction already exists.");
+            throw new Exception();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            log.error(e.getMessage());
             throw new AppConnectException();
         }
     }
 
-    private void saveNedaj(String username, NedajResponse nedajResponse) {
-        Nedaj nedaj = new Nedaj();
-
-        nedaj.setAgentId(nedajResponse.getAgentId());
-        nedaj.setMerchantId(nedajResponse.getMerchantId());
-        nedaj.setFuelType(nedajResponse.getFuelType());
-        nedaj.setMessageId(nedajResponse.getMessageId());
-        nedaj.setTransactionID(nedajResponse.getTransactionID());
-        nedaj.setDebitAcctNo(nedajResponse.getDEBITACCTNO());
-        nedaj.setDebitAmount(nedajResponse.getDEBITAMOUNT());
-        nedaj.setTransactionDate(nedajResponse.getTRANSACTION_DATE());
-
-        nedaj.setUser(userService.utilGetUserByUsername(username));
-
-        nedajRepository.save(nedaj);
-    }
-
-    private String generateUniqueMessageId(String fuelType) {
-        final String ALL_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
-        final int LENGTH = 15;
-        SecureRandom random = new SecureRandom();
-
-        StringBuilder stringBuilder = new StringBuilder(LENGTH);
-        for (int i = 0; i < LENGTH; i++) {
-            int randomIndex = random.nextInt(ALL_CHARS.length());
-            stringBuilder.append(ALL_CHARS.charAt(randomIndex));
-        }
-        String randomString = stringBuilder.toString();
-        String first3Letters = fuelType.substring(0, 3).toUpperCase();
-
-        return first3Letters + randomString;
+    private void checkUniquenessOFMessageId(String messageId) {
+        if (nedajRepository.findByMessageId(messageId).isPresent())
+            throw new ResourceAlreadyExistsException("A transaction already exists.");
     }
 
 }
