@@ -1,6 +1,7 @@
 package com.dxvalley.epassbook.account;
 
-import com.dxvalley.epassbook.dto.ApiResponse;
+import com.dxvalley.epassbook.account.dto.PrimaryAccountDTO;
+import com.dxvalley.epassbook.utils.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,13 @@ public class AccountController {
     private AccountService accountService;
 
     @GetMapping("/getAccounts/{username}")
-    ResponseEntity<?> getUsers(@PathVariable String username) {
+    ResponseEntity<?> getAccounts(@PathVariable String username) {
         return ApiResponse.success(accountService.getAccountsByUsername(username));
+    }
+
+    @GetMapping("/getByPhoneNumber/{phoneNumber}")
+    ResponseEntity<?> getAccountByPhoneNumber(@PathVariable String phoneNumber) {
+        return ApiResponse.success(accountService.getAccountByPhoneNumber(phoneNumber));
     }
 
     @PatchMapping("/changeAccountStatus/{accountNumber}/{status}")
@@ -33,7 +39,7 @@ public class AccountController {
     }
 
     @PostMapping("/getPrimaryAccount")
-    public ResponseEntity<?> getPrimaryAccount(@RequestBody @Valid PrimaryAccount primaryAccountRequest) {
+    public ResponseEntity<?> getPrimaryAccount(@RequestBody @Valid PrimaryAccountDTO primaryAccountRequest) {
         return accountService.getPrimaryAccount(primaryAccountRequest);
     }
 }
